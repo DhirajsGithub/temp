@@ -1,5 +1,9 @@
+import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { gapi } from 'gapi-script';
+import { GoogleLogin } from 'react-google-login';
 // @mui
+import { Navigate, useNavigate } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Link, Container, Typography, Divider, Stack, Button } from '@mui/material';
 // hooks
@@ -9,6 +13,7 @@ import Logo from '../components/logo';
 import Iconify from '../components/iconify';
 // sections
 import { LoginForm } from '../sections/auth/login';
+import clientId from '../constants/client-id';
 
 // ----------------------------------------------------------------------
 
@@ -42,6 +47,25 @@ const StyledContent = styled('div')(({ theme }) => ({
 
 export default function LoginPage() {
   const mdUp = useResponsive('up', 'md');
+  const navigate = useNavigate();
+
+  const onSuccess = (res) => {
+    navigate('/dashboard', { replace: true });
+    console.log('login success ', res.profileObj);
+  };
+  const onFailure = (res) => {
+    console.log('login failed ', res);
+  };
+
+  useEffect(() => {
+    function start() {
+      gapi.client.init({
+        clientId: { clientId },
+        scope: '',
+      });
+    }
+    gapi.load('client', start);
+  }, []);
 
   return (
     <>
@@ -73,23 +97,28 @@ export default function LoginPage() {
               Sign in to Minimal
             </Typography>
 
-            <Typography variant="body2" sx={{ mb: 5 }}>
-              Don’t have an account? {''}
-              <Link variant="subtitle2">Get started</Link>
-            </Typography>
-
             <Stack direction="row" spacing={2}>
-              <Button fullWidth size="large" color="inherit" variant="outlined">
-                <Iconify icon="eva:google-fill" color="#DF3E30" width={22} height={22} />
-              </Button>
+              <GoogleLogin
+                clientId={clientId}
+                buttonText="Login"
+                render={(renderProps) => (
+                  <Button onClick={renderProps.onClick} fullWidth size="large" color="inherit" variant="outlined">
+                    <Iconify icon="eva:google-fill" color="#DF3E30" width={22} height={22} />
+                  </Button>
+                )}
+                onSuccess={onSuccess}
+                onFailure={onFailure}
+                cookiePolicy={'single_host_origin'}
+                isSignedIn
+              />
 
-              <Button fullWidth size="large" color="inherit" variant="outlined">
+              {/* <Button fullWidth size="large" color="inherit" variant="outlined">
                 <Iconify icon="eva:facebook-fill" color="#1877F2" width={22} height={22} />
               </Button>
 
               <Button fullWidth size="large" color="inherit" variant="outlined">
                 <Iconify icon="eva:twitter-fill" color="#1C9CEA" width={22} height={22} />
-              </Button>
+              </Button> */}
             </Stack>
 
             <Divider sx={{ my: 3 }}>

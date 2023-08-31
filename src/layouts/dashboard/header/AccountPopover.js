@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { alpha } from '@mui/material/styles';
 import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton, Popover } from '@mui/material';
 // mocks_
+import { GoogleLogout } from 'react-google-login';
+import { useNavigate } from 'react-router-dom';
 import account from '../../../_mock/account';
 
 // ----------------------------------------------------------------------
@@ -26,13 +28,17 @@ const MENU_OPTIONS = [
 
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
-
+  const navigate = useNavigate();
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
   };
 
   const handleClose = () => {
     setOpen(null);
+  };
+
+  const handleLogoutSuccess = () => {
+    navigate('/login', { replace: true });
   };
 
   return (
@@ -96,10 +102,14 @@ export default function AccountPopover() {
         </Stack>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
-
-        <MenuItem onClick={handleClose} sx={{ m: 1 }}>
-          Logout
-        </MenuItem>
+        <GoogleLogout
+          onLogoutSuccess={handleLogoutSuccess}
+          render={(renderProps) => (
+            <MenuItem onClick={renderProps.onClick} sx={{ m: 1 }}>
+              Logout
+            </MenuItem>
+          )}
+        />
       </Popover>
     </>
   );
